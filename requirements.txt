@@ -24,7 +24,7 @@ gradio
 langchain
 cohere
 openai
-vllm==0.4.3
+# vllm==0.4.3
 datasets
 huggingface-hub
 tqdm
