@@ -1,5 +1,5 @@
 # PyTorch (latest 2.x)
-torch>=2.3.0
+torch==2.3.0
 torchvision
 torchaudio
 
