@@ -24,6 +24,8 @@ gradio
 langchain
 cohere
 openai
+accelerate
+bitsandbytes
 # vllm==0.4.3
 datasets
 huggingface-hub

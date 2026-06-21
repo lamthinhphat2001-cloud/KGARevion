@@ -3,15 +3,24 @@ import re
 import json
 from tqdm import tqdm
 from openai import AzureOpenAI
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
+import torch
 
+bnb_config = BitsAndBytesConfig(
+    load_in_4bit=True,
+    bnb_4bit_use_double_quant=True,
+    bnb_4bit_quant_type="nf4",
+    bnb_4bit_compute_dtype=torch.bfloat16,
+)
 
 class BaseLLM(object):
     def __init__(self, llm_name):
         self.llm_name = llm_name
         if llm_name.lower() in ['llama3.1', 'llama3']:
             self.llm_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Meta-Llama-3.1-8B-Instruct", token=os.getenv("HG_TOKEN"))
-            self.llm_model = AutoModelForCausalLM.from_pretrained("meta-llama/Meta-Llama-3.1-8B-Instruct", device_map='auto', token=os.getenv("HG_TOKEN"))
+            self.llm_model = AutoModelForCausalLM.from_pretrained("meta-llama/Meta-Llama-3.1-8B-Instruct", device_map='auto',
+                                                                  quantization_config=bnb_config,
+                                                                   token=os.getenv("HG_TOKEN"))
         elif llm_name.lower() in ['gpt-4-turbo']:
             self.client = AzureOpenAI(
                 azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT"), 
