@@ -10,8 +10,8 @@ class BaseLLM(object):
     def __init__(self, llm_name):
         self.llm_name = llm_name
         if llm_name.lower() in ['llama3.1', 'llama3']:
-            self.llm_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Meta-Llama-3.1-8B-Instruct")
-            self.llm_model = AutoModelForCausalLM.from_pretrained("meta-llama/Meta-Llama-3.1-8B-Instruct", device_map='auto')
+            self.llm_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Meta-Llama-3.1-8B-Instruct", token=os.getenv("HG_TOKEN"))
+            self.llm_model = AutoModelForCausalLM.from_pretrained("meta-llama/Meta-Llama-3.1-8B-Instruct", device_map='auto', token=os.getenv("HG_TOKEN"))
         elif llm_name.lower() in ['gpt-4-turbo']:
             self.client = AzureOpenAI(
                 azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT"), 

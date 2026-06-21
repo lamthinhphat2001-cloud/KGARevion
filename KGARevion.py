@@ -7,7 +7,7 @@ import logging
 from src.utils import QADataset, MedDDxLoader, BaseLLM, AfrimedLoader
 from action.generate import Generate
 from action.review import Review
-from action.answer import Answer, AnswerOpen
+from action.answer import Answer
 
 set_seed(42)
 
@@ -33,7 +33,7 @@ class KGARevion(object):
     def call(self, query):
         logging.info(query)
         print("query")
-        generated_triplets, mt = self.triplets_generator.call(query)
+        generated_triplets = self.triplets_generator.call(query)
         print(generated_triplets)
         filtered_triplets, score = self.classifier.call(generated_triplets, query)
         answer = self.answer_generator.call(filtered_triplets, query)
@@ -71,27 +71,38 @@ def main(args):
             query = d['text']
             label = d['answer']
         
-        response = bioKG_agent.call(query)
-        response = response.strip().replace('\n', '').replace('\"', '')
-        
-        logging.info(f'Response: {response}, Label: {label}')
-           
-        predict_answer = 'None'
-        if "Answer: " in response:
-            answer_index = response.find("Answer: ")
-            predict_answer = response[answer_index + len("Answer: "):].strip()[0]
-        
-        
-        if predict_answer not in ['A', 'B', 'C', 'D', 'E'] and label in response:
-            predict_answer = label
-        predict_answer = predict_answer.strip()
+        try:
+            response = bioKG_agent.call(query)
+            if not response:
+                logging.warning(f"Empty response for query (idx: {idx}): {query}")
+                response_all.append("") # 空の応答を追加して続行
+                continue
 
-        logging.info("predict_answer: {} and correct answer: {}".format(predict_answer, label))
-        
-        if predict_answer == label:
-            accurate_sample_idx.append(idx)
-       
-        response_all.append(response[answer_index + len("Answer: "):].strip())
+            response_clean = response.strip().replace('\n', '').replace('\"', '')
+            logging.info(f'Response: {response_clean}, Label: {label}')
+
+            predict_answer = 'None'
+            answer_text = ""
+            answer_prefix = "Answer: "
+            if answer_prefix in response:
+                answer_index = response.find(answer_prefix)
+                answer_text = response[answer_index + len(answer_prefix):].strip()
+                if answer_text:
+                    predict_answer = answer_text[0]
+
+            if predict_answer not in ['A', 'B', 'C', 'D', 'E'] and label in response:
+                predict_answer = label
+            predict_answer = predict_answer.strip()
+
+            logging.info("predict_answer: {} and correct answer: {}".format(predict_answer, label))
+
+            if predict_answer == label:
+                accurate_sample_idx.append(idx)
+
+            response_all.append(answer_text)
+        except Exception as e:
+            logging.error(f"An error occurred at index {idx} for query '{query}': {e}", exc_info=True)
+            response_all.append(f"ERROR: {e}")
 
         
     if args.type == 'SAQ':
