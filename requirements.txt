@@ -34,7 +34,7 @@ requests
 pillow
 einops
 orjson
-peft==0.3.0
+peft
 rouge-score
 
 # scispaCy model (special URL)
