@@ -75,6 +75,7 @@ class ReviewInfer(object):
     def load_model(self, model, model_weights):
         # model = PeftModel.from_pretrained(model, model_weights).cuda()
         model = PeftModel.from_pretrained(model, model_weights, device_map="auto", offload_folder="../offload")
+        model = model.half()
         model.config.pad_token_id = self.tokenizer.eos_token_id 
         model = model.eval()
 
