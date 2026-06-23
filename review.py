@@ -194,6 +194,7 @@ class LmToKG(nn.Module):
         logits = logits + (attention_mask + 1e-45).log()
         logits_lm_to_kg = torch.nn.functional.log_softmax(logits, dim=1) ##(bz, 3, 512)
         #logits_kg_to_lm = torch.nn.functional.log_softmax(logits, dim=-1) ##(bz, 3, 512)
+        logits_lm_to_kg = logits_lm_to_kg.to(dtype=lm_emb.dtype)
 
         lm_kg_emd = torch.matmul(logits_lm_to_kg, lm_emb) ##(bz, 3, 4096)
         #kg_lm_emb = torch.matmul(torch.permute(logits_kg_to_lm, (0, 2, 1)), kg_emb) ##(bz, 512, 4096)
