@@ -179,7 +179,7 @@ class LmToKG(nn.Module):
         #print(lm_emb.shape)
         # logging.info(f"kg_emb dtype: {kg_emb.dtype}")   # tells you which one is wrong
         # logging.info(f"lm_emb dtype: {lm_emb.dtype}")
-        kg_emb = kg_emb.to(lm_emb.dtype)
+        kg_emb = kg_emb.to(lm_emb.device, dtype=lm_emb.dtype)
         
         logits = torch.matmul(kg_emb, torch.permute(lm_emb, (0, 2, 1)))  ##(bz, 3, 512)
         ##print("logits")
